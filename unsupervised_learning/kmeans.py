@@ -1,3 +1,7 @@
+from pathlib import Path
+import sys
+path = str(Path(Path(__file__).parent.absolute()).parent.absolute())
+sys.path.insert(0, path)
 from mnist_utils.util import _x, _y_int
 from sklearn.cluster import MiniBatchKMeans
 from sklearn.metrics import accuracy_score, adjusted_rand_score
