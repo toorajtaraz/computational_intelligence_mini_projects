@@ -1,4 +1,4 @@
-from util import _x, _y_int
+from mnist_utils.util import _x, _y_int
 from sklearn.cluster import MeanShift, estimate_bandwidth
 from sklearn.metrics import accuracy_score, adjusted_rand_score
 import numpy as np

@@ -3,7 +3,7 @@ from sklearn.decomposition import PCA
 from sklearn.metrics import accuracy_score, adjusted_rand_score
 from sklearn.preprocessing import StandardScaler
 from tabulate import tabulate
-from util import _x, _y_int
+from mnist_utils.util import _x, _y_int
 import math
 import numpy as np
 import random as rand
