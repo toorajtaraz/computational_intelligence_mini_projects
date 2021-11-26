@@ -60,7 +60,7 @@ def pipeline(max_iter_max=100, max_iter_coe=3):
     kernels = ["linear", "rbf", "poly"]
     decision_function_shapes = ["ovo", "ovr"]
     result = []
-    while max_iter <= max_iter_max:
+    while max_iter > max_iter_max:
         for k in kernels:
             for d in decision_function_shapes:
                 print("Trying with max_iter = ", max_iter, " kernel = ", k, " decision_function_shape = ", d)
@@ -69,10 +69,6 @@ def pipeline(max_iter_max=100, max_iter_coe=3):
                 result.append([max_iter, k, d, test1, train1, test2, train2])
 
         max_iter *= max_iter_coe
-        if max_iter >= max_iter_max:
-            max_iter = -1
-        if max_iter == -1:
-            break
 
     print(tabulate(result, headers=['max_iter', 'kernel', 'shape', "TEST_P", "TRAIN_P", "TEST_RI", "TRAIN_RI"]))
 #+END_SRC

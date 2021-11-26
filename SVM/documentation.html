@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-11-26 Fri 20:22 -->
+<!-- 2021-11-26 Fri 20:27 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Support Vector Machines</title>
@@ -225,24 +225,24 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#orgd3dc4f2">1. How the script works?</a>
+<li><a href="#org7610475">1. How the script works?</a>
 <ul>
-<li><a href="#org28f2cad">1.1. Libraries</a></li>
-<li><a href="#orgc393f66">1.2. Functions</a></li>
+<li><a href="#org07d87f5">1.1. Libraries</a></li>
+<li><a href="#org45047ac">1.2. Functions</a></li>
 </ul>
 </li>
-<li><a href="#org22b640b">2. How it works?</a></li>
-<li><a href="#org814dd58">3. Results</a></li>
+<li><a href="#orgc3c5350">2. How it works?</a></li>
+<li><a href="#org6916c7a">3. Results</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-orgd3dc4f2" class="outline-2">
-<h2 id="orgd3dc4f2"><span class="section-number-2">1.</span> How the script works?</h2>
+<div id="outline-container-org7610475" class="outline-2">
+<h2 id="org7610475"><span class="section-number-2">1.</span> How the script works?</h2>
 <div class="outline-text-2" id="text-1">
 </div>
-<div id="outline-container-org28f2cad" class="outline-3">
-<h3 id="org28f2cad"><span class="section-number-3">1.1.</span> Libraries</h3>
+<div id="outline-container-org07d87f5" class="outline-3">
+<h3 id="org07d87f5"><span class="section-number-3">1.1.</span> Libraries</h3>
 <div class="outline-text-3" id="text-1-1">
 <p>
 Similar to what I utilized for previous projects, I&rsquo;ve used scikit for this project as well, and a util script used for loading MNIST library.
@@ -266,8 +266,8 @@ sys.path.insert(<span style="color: #da8548; font-weight: bold;">0</span>, path)
 </div>
 </div>
 
-<div id="outline-container-orgc393f66" class="outline-3">
-<h3 id="orgc393f66"><span class="section-number-3">1.2.</span> Functions</h3>
+<div id="outline-container-org45047ac" class="outline-3">
+<h3 id="org45047ac"><span class="section-number-3">1.2.</span> Functions</h3>
 <div class="outline-text-3" id="text-1-2">
 <ol class="org-ol">
 <li>learn : This function initializes the support vector classifier with different parameters and is used in the main pipeline, as it took unreasonably long time to train on the whole dataset, I tried training it on a subset of size 10000!</li>
@@ -297,8 +297,8 @@ sys.path.insert(<span style="color: #da8548; font-weight: bold;">0</span>, path)
 </div>
 </div>
 
-<div id="outline-container-org22b640b" class="outline-2">
-<h2 id="org22b640b"><span class="section-number-2">2.</span> How it works?</h2>
+<div id="outline-container-orgc3c5350" class="outline-2">
+<h2 id="orgc3c5350"><span class="section-number-2">2.</span> How it works?</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 Support Vector Machines try to find a line that divides a dateset into two subsets, in a way that the margin is maximized; in other words they try to solve an optimization problem solving for maximized margin. Although they are great at doing what they do, binary classifications, there are not enough for most applications if they are left as they are, in order to classify data into more that two sets we need to use one of these methodes:
@@ -329,7 +329,7 @@ scikit provides us with multiple kernels, here are the ones of used in the main 
     <span style="color: #dcaeea;">kernels</span> = [<span style="color: #98be65;">"linear"</span>, <span style="color: #98be65;">"rbf"</span>, <span style="color: #98be65;">"poly"</span>]
     <span style="color: #dcaeea;">decision_function_shapes</span> = [<span style="color: #98be65;">"ovo"</span>, <span style="color: #98be65;">"ovr"</span>]
     <span style="color: #dcaeea;">result</span> = []
-    <span style="color: #51afef;">while</span> max_iter &lt;= max_iter_max:
+    <span style="color: #51afef;">while</span> max_iter &gt; max_iter_max:
         <span style="color: #51afef;">for</span> k <span style="color: #51afef;">in</span> kernels:
             <span style="color: #51afef;">for</span> d <span style="color: #51afef;">in</span> decision_function_shapes:
                 <span style="color: #51afef;">print</span>(<span style="color: #98be65;">"Trying with max_iter = "</span>, max_iter, <span style="color: #98be65;">" kernel = "</span>, k, <span style="color: #98be65;">" decision_function_shape = "</span>, d)
@@ -338,10 +338,6 @@ scikit provides us with multiple kernels, here are the ones of used in the main 
                 result.append([max_iter, k, d, test1, train1, test2, train2])
 
         <span style="color: #dcaeea;">max_iter</span> *= max_iter_coe
-        <span style="color: #51afef;">if</span> max_iter &gt;= max_iter_max:
-            <span style="color: #dcaeea;">max_iter</span> = -<span style="color: #da8548; font-weight: bold;">1</span>
-        <span style="color: #51afef;">if</span> max_iter == -<span style="color: #da8548; font-weight: bold;">1</span>:
-            <span style="color: #51afef;">break</span>
 
     <span style="color: #51afef;">print</span>(tabulate(result, headers=[<span style="color: #98be65;">'max_iter'</span>, <span style="color: #98be65;">'kernel'</span>, <span style="color: #98be65;">'shape'</span>, <span style="color: #98be65;">"TEST_P"</span>, <span style="color: #98be65;">"TRAIN_P"</span>, <span style="color: #98be65;">"TEST_RI"</span>, <span style="color: #98be65;">"TRAIN_RI"</span>]))
 </pre>
@@ -349,8 +345,8 @@ scikit provides us with multiple kernels, here are the ones of used in the main 
 </div>
 </div>
 
-<div id="outline-container-org814dd58" class="outline-2">
-<h2 id="org814dd58"><span class="section-number-2">3.</span> Results</h2>
+<div id="outline-container-org6916c7a" class="outline-2">
+<h2 id="org6916c7a"><span class="section-number-2">3.</span> Results</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 Actually there is not much to the results, they are exactly what we expect them to be, rbf better than poly and linear and the more iterations we have the higher the accuracy that we get! poly kernels are not as famous in SVMs as they are in natural language processing, even there they have their limitations, they are used in second order because they tend to over fit in higher orders!
@@ -1076,7 +1072,7 @@ Actually there is not much to the results, they are exactly what we expect them 
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Tooraj Taraz</p>
-<p class="date">Created: 2021-11-26 Fri 20:22</p>
+<p class="date">Created: 2021-11-26 Fri 20:27</p>
 </div>
 </body>
 </html>
