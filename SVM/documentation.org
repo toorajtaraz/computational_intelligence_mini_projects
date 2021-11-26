@@ -1,0 +1,144 @@
+#+TITLE: Support Vector Machines
+#+AUTHOR: Tooraj Taraz
+#+OPTIONS: ^:nil _:nil tex:t
+#+SETUPFILE: ~/.doom.d/retro-dark.theme
+
+* How the script works?
+** Libraries
+Similar to what I utilized for previous projects, I've used scikit for this project as well, and a util script used for loading MNIST library.
+First 4 lines are only for handling project structure! (Up to this point almost everything is identical to previous projects)
+#+BEGIN_SRC python
+from pathlib import Path
+import sys
+path = str(Path(Path(__file__).parent.absolute()).parent.absolute())
+sys.path.insert(0, path)
+from mnist_utils.util import _x, _y, _y_int, _a, _b_int
+from sklearn import svm
+from sklearn.metrics import accuracy_score, adjusted_rand_score
+from tabulate import tabulate
+import math
+import numpy as np
+import random as rn
+import time
+#+END_SRC
+
+** Functions
+1. learn : This function initializes the support vector classifier with different parameters and is used in the main pipeline, as it took unreasonably long time to train on the whole dataset, I tried training it on a subset of size 10000!
+#+BEGIN_SRC python
+def learn(decision_function_shape="ovo", kernel="linear", max_iter=1):
+    svm_classifier = svm.SVC(decision_function_shape=decision_function_shape, kernel=kernel, max_iter=max_iter)
+    svm_classifier.fit(_x[:10000], _y_int[:10000])
+    return svm_classifier
+#+END_SRC
+
+2. test_accuracy : this function simply measures purity and random index score on training data set and test data set
+#+BEGIN_SRC python
+def test_accuracy(trained_svm):
+    test1 = accuracy_score(_b_int, trained_svm.predict(_a))
+    train1 = accuracy_score(_y_int, trained_svm.predict(_x))
+
+    test2 = adjusted_rand_score(_b_int, trained_svm.predict(_a))
+    train2 = adjusted_rand_score(_y_int, trained_svm.predict(_x))
+    return test1, train1, test2, train2
+#+END_SRC
+
+* How it works?
+Support Vector Machines try to find a line that divides a dateset into two subsets, in a way that the margin is maximized; in other words they try to solve an optimization problem solving for maximized margin. Although they are great at doing what they do, binary classifications, there are not enough for most applications if they are left as they are, in order to classify data into more that two sets we need to use one of these methodes:
+1. one-versus-one
+2. one-versus-rest
+There is one more  catch to it, it tries to find a **line**, a straight one! And that's not always good, what if the dataset isn't linearly separable? In situations like this we can map data to a higher dimension and try to find a plane that does the job, or we can use a non-linear kernel.
+scikit provides us with multiple kernels, here are the ones of used in the main pipeline:
+1. poly
+2. rbf: These radial basis functions are from C ∞ ( R ) and are strictly positive definite functions. Such as Gaussian function :
+\[
+  X \sim \mathcal{N}(\mu,\,\sigma^{2})\,.
+\]
+3. linear
+#+BEGIN_SRC python
+def pipeline(max_iter_max=100, max_iter_coe=3):
+    max_iter = 1
+    kernels = ["linear", "rbf", "poly"]
+    decision_function_shapes = ["ovo", "ovr"]
+    result = []
+    while max_iter <= max_iter_max:
+        for k in kernels:
+            for d in decision_function_shapes:
+                print("Trying with max_iter = ", max_iter, " kernel = ", k, " decision_function_shape = ", d)
+                svc = learn(d, k, max_iter)
+                test1, train1, test2, train2 = test_accuracy(svc)
+                result.append([max_iter, k, d, test1, train1, test2, train2])
+
+        max_iter *= max_iter_coe
+        if max_iter >= max_iter_max:
+            max_iter = -1
+        if max_iter == -1:
+            break
+
+    print(tabulate(result, headers=['max_iter', 'kernel', 'shape', "TEST_P", "TRAIN_P", "TEST_RI", "TRAIN_RI"]))
+#+END_SRC
+
+* Results
+Actually there is not much to the results, they are exactly what we expect them to be, rbf better than poly and linear and the more iterations we have the higher the accuracy that we get! poly kernels are not as famous in SVMs as they are in natural language processing, even there they have their limitations, they are used in second order because they tend to over fit in higher orders!
++----------+----------+----------+----------+----------+----------+----------+
+| max_iter |  kernel  |  shape   |  TEST_P  | TRAIN_P  | TEST_RI  | TRAIN_RI |
++----------+----------+----------+----------+----------+----------+----------+
+|    1     |  linear  |   ovo    |  0.4798  | 0.47685  | 0.221493 | 0.219144 |
++----------+----------+----------+----------+----------+----------+----------+
+|    1     |  linear  |   ovr    |  0.4798  | 0.47685  | 0.221493 | 0.219144 |
++----------+----------+----------+----------+----------+----------+----------+
+|    1     |   rbf    |   ovo    |  0.3985  | 0.39905  | 0.161733 | 0.166375 |
++----------+----------+----------+----------+----------+----------+----------+
+|    1     |   rbf    |   ovr    |  0.3985  | 0.39905  | 0.161733 | 0.166375 |
++----------+----------+----------+----------+----------+----------+----------+
+|    1     |   poly   |   ovo    |  0.2322  | 0.22295  |0.0105866 |0.00974319|
++----------+----------+----------+----------+----------+----------+----------+
+|    1     |   poly   |   ovr    |  0.2322  | 0.22295  |0.0105866 |0.00974319|
++----------+----------+----------+----------+----------+----------+----------+
+|    3     |  linear  |   ovo    |  0.5673  | 0.565733 | 0.301706 | 0.296545 |
++----------+----------+----------+----------+----------+----------+----------+
+|    3     |  linear  |   ovr    |  0.5673  | 0.565733 | 0.301706 | 0.296545 |
++----------+----------+----------+----------+----------+----------+----------+
+|    3     |   rbf    |   ovo    |  0.5649  | 0.567817 | 0.300823 | 0.303718 |
++----------+----------+----------+----------+----------+----------+----------+
+|    3     |   rbf    |   ovr    |  0.5649  | 0.567817 | 0.300823 | 0.303718 |
++----------+----------+----------+----------+----------+----------+----------+
+|    3     |   poly   |   ovo    |  0.1742  | 0.167583 |0.0114695 |0.0101923 |
++----------+----------+----------+----------+----------+----------+----------+
+|    3     |   poly   |   ovr    |  0.1742  | 0.167583 |0.0114695 |0.0101923 |
++----------+----------+----------+----------+----------+----------+----------+
+|    9     |  linear  |   ovo    |  0.6429  | 0.65365  | 0.407321 | 0.420937 |
++----------+----------+----------+----------+----------+----------+----------+
+|    9     |  linear  |   ovr    |  0.6429  | 0.65365  | 0.407321 | 0.420937 |
++----------+----------+----------+----------+----------+----------+----------+
+|    9     |   rbf    |   ovo    |  0.7653  | 0.76735  | 0.568324 | 0.570437 |
++----------+----------+----------+----------+----------+----------+----------+
+|    9     |   rbf    |   ovr    |  0.7653  | 0.76735  | 0.568324 | 0.570437 |
++----------+----------+----------+----------+----------+----------+----------+
+|    9     |   poly   |   ovo    |  0.2065  | 0.194183 |0.00901324|0.00835075|
++----------+----------+----------+----------+----------+----------+----------+
+|    9     |   poly   |   ovr    |  0.2065  | 0.194183 |0.00901324|0.00835075|
++----------+----------+----------+----------+----------+----------+----------+
+|    27    |  linear  |   ovo    |  0.8028  | 0.803033 | 0.633213 | 0.632498 |
++----------+----------+----------+----------+----------+----------+----------+
+|    27    |  linear  |   ovr    |  0.8028  | 0.803033 | 0.633213 | 0.632498 |
++----------+----------+----------+----------+----------+----------+----------+
+|    27    |   rbf    |   ovo    |  0.8877  |  0.886   | 0.77161  | 0.77001  |
++----------+----------+----------+----------+----------+----------+----------+
+|    27    |   rbf    |   ovr    |  0.8877  |  0.886   | 0.77161  | 0.77001  |
++----------+----------+----------+----------+----------+----------+----------+
+|    27    |   poly   |   ovo    |  0.3426  | 0.328367 |0.0889284 |0.0819758 |
++----------+----------+----------+----------+----------+----------+----------+
+|    27    |   poly   |   ovr    |  0.3426  | 0.328367 |0.0889284 |0.0819758 |
++----------+----------+----------+----------+----------+----------+----------+
+|    81    |  linear  |   ovo    |  0.8694  | 0.874917 | 0.743308 | 0.75361  |
++----------+----------+----------+----------+----------+----------+----------+
+|    81    |  linear  |   ovr    |  0.8694  | 0.874917 | 0.743308 | 0.75361  |
++----------+----------+----------+----------+----------+----------+----------+
+|    81    |   rbf    |   ovo    |  0.9518  | 0.955317 | 0.897281 | 0.904572 |
++----------+----------+----------+----------+----------+----------+----------+
+|    81    |   rbf    |   ovr    |  0.9518  | 0.955317 | 0.897281 | 0.904572 |
++----------+----------+----------+----------+----------+----------+----------+
+|    81    |   poly   |   ovo    |  0.8345  |  0.8349  | 0.690997 | 0.692687 |
++----------+----------+----------+----------+----------+----------+----------+
+|    81    |   poly   |   ovr    |  0.8345  |  0.8349  | 0.690997 | 0.692687 |
++----------+----------+----------+----------+----------+----------+----------+
